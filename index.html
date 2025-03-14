@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #links {
+            width: 80%;
+            height: 80%;
+            overflow: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #table th {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        #table th,
+        #table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        #table tr:nth-child(odd) {
+            background-color: #dbc18e;
+        }
+
+        #table tr:nth-child(even) {
+            background-color: #d78c84;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="links">
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Sl. No</th>
+                        <th>File Name</th>
+                        <th>Demo Link</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script defer>
+        const demobaseUrl = 'https://venkataramanarao5.github.io/webpages-for-fun/'
+        const filesBaseUrl = 'https://github.com/VenkataRamanaRao5/webpages-for-fun/blob/main/'
+        let table = document.getElementById('table')
+        let res = fetch('https://api.github.com/repos/VenkataRamanaRao5/webpages-for-fun/git/trees/main?recursive=1')
+            .then(response => response.json())
+            .then(data => {
+                let htmlFiles = data.tree.filter(file => file.path.endsWith('.html')).map(file => file.path)
+                console.log(htmlFiles)
+                return htmlFiles
+            })
+            .then(htmlFiles => {
+                htmlFiles.forEach((file, index) => {
+                    console.log(file)
+                    let tr = document.createElement('tr')
+                    let td1 = document.createElement('td')
+                    let td2 = document.createElement('td')
+                    let td3 = document.createElement('td')
+                    td1.innerHTML = index + 1
+                    td2.innerHTML = `<a href ="${filesBaseUrl}${file}">${file.replace('.html', '')}</a>`
+                    td3.innerHTML = `<a href="${demobaseUrl}${file}">${demobaseUrl}${file}</a>`
+                    tr.appendChild(td1)
+                    tr.appendChild(td2)
+                    tr.appendChild(td3)
+                    table.appendChild(tr)
+                })
+            })
+    </script>
+</body>
+
+</html>
