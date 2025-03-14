@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find it</title>
+    <style>
+        #container,
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            background-image: url("data:image/jpeg;base64,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");
+            background-size:cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            backdrop-filter: opacity(0.8);
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        #text {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid black;
+            border-radius: 10px;
+            font-size: large;
+            box-sizing: border-box;
+            touch-action: none;
+        }
+
+        #hider {
+            overflow: hidden;
+            top: -130%;
+            left: -130%;
+            width: 230%;
+            height: 230%;
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 1) 15%);
+            z-index: -1;
+            position: absolute;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="text">
+            <div id="hider"></div>
+            <p>We're no strangers to love<br>
+                You know the rules and so do I<br>
+                A full commitment's what I'm thinkin' of<br>
+                You wouldn't get this from any other guy<br>
+                I just wanna tell you how I'm feeling<br>
+                Gotta make you understand</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+            <p>We've known each other for so long<br>
+                Your heart's been aching, but you're too shy to say it<br>
+                Inside, we both know what's been going on<br>
+                We know the game and we're gonna play it<br>
+                And if you ask me how I'm feeling<br>
+                Don't tell me you're too blind to see</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+            <p>We've known each other for so long<br>
+                Your heart's been aching, but you're too shy to say it<br>
+                Inside, we both know what's been going on<br>
+                We know the game and we're gonna play it<br>
+                I just wanna tell you how I'm feeling<br>
+                Gotta make you understand</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+            <p>Never gonna give you up<br>
+                Never gonna let you down<br>
+                Never gonna run around and desert you<br>
+                Never gonna make you cry<br>
+                Never gonna say goodbye<br>
+                Never gonna tell a lie and hurt you</p>
+
+        </div>
+    </div>
+    <script>
+        let hider = document.getElementById("hider");
+        let w = parseFloat(getComputedStyle(hider).width.replace("px", "")), h = parseFloat(getComputedStyle(hider).height.replace("px", ""));
+        let x = w / 2, y = h / 2;
+
+        let endFind = (e) => {
+            e.preventDefault();
+            hider.style.left = `-130%`;
+            hider.style.top = `-130%`;
+        }
+
+        let mover = (e) => {
+            e.preventDefault();
+            if (e.clientX == undefined) {
+                screenX = e.touches[0].clientX;
+                screenY = e.touches[0].clientY;
+            }
+            else {
+                screenX = e.clientX;
+                screenY = e.clientY;
+            }
+            let centerx = Math.max(Math.min(screenX - x, 0), -x),
+                centery = Math.max(Math.min(screenY - y, 0), -y);
+            hider.style.left = `${centerx}px`;
+            hider.style.top = `${centery}px`;
+            hider.style.left
+        }
+
+        window.addEventListener("mousemove", mover);
+        window.addEventListener("touchmove", mover);
+
+        window.addEventListener("mouseout", endFind);
+        window.addEventListener("touchend", endFind);
+
+        window.addEventListener("touchstart", (e) => e.preventDefault());
+        window.addEventListener("touchmove", (e) => e.preventDefault());
+        window.addEventListener("touchend", (e) => e.preventDefault());
+    </script>
+</body>
+
+</html>

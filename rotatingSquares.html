@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            --squareSize: 30px;
+            --padding: 9px;
+            --duration: 3s;
+        }
+
+        .square {
+            width: var(--squareSize);
+            height: var(--squareSize);
+            background-color: rgb(159, 145, 145);
+            position: absolute;
+            border-radius: 2px;
+        }
+
+        .rotating {
+            animation: var(--duration) linear infinite rotate;
+            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div class="square middle"></div>
+        <div class="square rotating"></div>
+        <div class="square rotating"></div>
+        <div class="square rotating"></div>
+        <div class="square rotating"></div>
+    </div>
+    <script defer>
+        let container = document.getElementById('container');
+        let middle = document.getElementsByClassName('middle')[0];
+        let rotating = document.getElementsByClassName('rotating');
+        let width = parseFloat(getComputedStyle(container).width.replace('px', '')), 
+            height = parseFloat(getComputedStyle(container).height.replace('px', ''));
+        let squareSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--squareSize').replace('px', ''));
+        let duration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--duration').replace('s', ''));
+        let padding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--padding').replace('px', ''));
+        let delayScale = duration / rotating.length, delayAngle = 360 / rotating.length;
+        console.log(width, height, squareSize, duration, padding, delayScale, delayAngle, middle);
+        middle.style.left = (width - squareSize) / 2 + 'px';
+        middle.style.top = (height - squareSize) / 2 + 'px';
+        Array.from(rotating).forEach((element, index) => {
+            element.style.left = (width + squareSize) / 2 + padding + 'px';
+            element.style.top = (height - squareSize) / 2 + 'px';
+            element.style.transformOrigin = `-${squareSize / 2 + padding}px ${squareSize / 2}px`;
+            element.style.transform = `rotate(${index * delayAngle}deg)`;
+            element.style.animationDelay = `${-index * delayScale}s`;
+        });
+    </script>
+</body>
+
+</html>
