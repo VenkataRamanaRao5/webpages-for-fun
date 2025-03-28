@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colliding blocks</title>
+    <style>
+        html, body, #container {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #input{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #input * {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        #ratio{
+            width: 50px;
+        }
+
+        label{
+            text-align: right;
+        }
+
+        #start {
+            border-radius: 5px;
+        }
+
+        #table{
+            position: relative;
+            display: block;
+            height: 200px;
+        }
+
+        #wall{
+            position: absolute;
+            left: 50px;
+            bottom: 0;
+            background-color: black;
+            width: 20px;
+            height: 150px;
+        }
+
+        .block{
+            bottom: 0;
+            position: absolute;
+        }
+
+        #smaller{
+            background-color:coral;
+            left: 100px;
+            width: 50px;
+            height: 50px;
+        }
+
+        #larger{
+            background-color:tan;
+            left: 200px;
+            width: 75px;
+            height: 75px;
+        }
+
+        #floor{
+            background-color: black;
+            width: 100%;
+            height: 5px;
+            position: absolute;
+            bottom: -5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="input">
+            <label>Enter ratio: </label>
+            <input id="ratio" type="number" value="100"/>
+            <button id="start">Start</button>
+        </div>
+        <div id="table">
+            <div id="wall"></div>
+            <div id="smaller" class="block"></div>
+            <div id="larger" class="block"></div>
+            <div id="floor"></div>
+        </div>
+    </div>
+
+    <script async="false">
+        let ratio = 100
+        const input = document.getElementById('ratio')
+        const smaller = document.getElementById('smaller')
+        const larger = document.getElementById('larger')
+
+        let speedSmaller = 0
+        let speedLarger = 0
+
+        let startSpeed = -2
+
+        let momentum = startSpeed * ratio
+
+        let leftSmaller = 100
+        let leftLarger = 100
+
+        console.log(smaller, larger)
+
+        let updateIterval
+
+        function doesCollide(leftElement, rightElement){
+            const left = parseFloat(getComputedStyle(rightElement).left.replace('px', ''))
+            const right = parseFloat(getComputedStyle(leftElement).left.replace('px', '')) + leftElement.offsetWidth
+            console.log(left, right)
+            return right >= left
+        }
+
+        function update(){
+            if(doesCollide(smaller, larger)){
+                clearInterval(updateInterval)
+            }
+            else {
+                leftLarger += speedLarger
+                larger.style.left = leftLarger + 'px'
+            }
+        }
+
+        document.getElementById('start').addEventListener("click", (e) => {
+            ratio = parseFloat(input.value)
+            console.log(ratio)
+            speedLarger = startSpeed
+            leftLarger = 200
+            larger.style.left = leftLarger + 'px'
+            momentum = speedLarger * ratio
+            updateInterval = setInterval(update, 100)
+        })
+        
+    </script>
+</body>
+</html>
