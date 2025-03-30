@@ -18,13 +18,13 @@
             justify-content: center;
         }
 
-        #input * {
+        #input > * {
             margin-left: 5px;
             margin-right: 5px;
         }
 
-        #ratio{
-            width: 50px;
+        #ratio {
+            width: 75px;
         }
 
         label{
@@ -57,14 +57,14 @@
 
         #smaller{
             background-color:coral;
-            left: 100px;
+            left: 200px;
             width: 50px;
             height: 50px;
         }
 
         #larger{
             background-color:tan;
-            left: 200px;
+            left: 400px;
             width: 75px;
             height: 75px;
         }
@@ -77,6 +77,11 @@
             bottom: -5px;
         }
 
+        #pi, #count {
+            display: inline-block;
+            width: 50px;
+        }
+
     </style>
 </head>
 <body>
@@ -85,6 +90,14 @@
             <label>Enter ratio: </label>
             <input id="ratio" type="number" value="100"/>
             <button id="start">Start</button>
+            <div>
+                <span>Collision count:</span>
+                <span id="count">0</span>
+            </div>
+            <div>
+                <span>&LeftFloor;Collision / &Sqrt;ratio&RightFloor; = </span>
+                <span id="pi">0</span>
+            </div>
         </div>
         <div id="table">
             <div id="wall"></div>
@@ -99,46 +112,106 @@
         const input = document.getElementById('ratio')
         const smaller = document.getElementById('smaller')
         const larger = document.getElementById('larger')
+        const wall = document.getElementById('wall')
+        const countEl = document.getElementById('count')
+        const piEl = document.getElementById('pi')
 
         let speedSmaller = 0
         let speedLarger = 0
+        
+        let leftSmaller = 200
+        let leftLarger = 400
 
-        let startSpeed = -2
+        const largerWidth = larger.offsetWidth
+        const smallerWidth = smaller.offsetWidth
+        const wallRight = wall.offsetWidth + parseInt(getComputedStyle(wall).left.replace('px', ''))
+        
+        let count = 0
+        
+        console.log(smaller, larger, wall.offsetWidth, wallRight)
 
-        let momentum = startSpeed * ratio
+        let drawInterval
+        let updateInterval
 
-        let leftSmaller = 100
-        let leftLarger = 100
+        let play = false
 
-        console.log(smaller, larger)
-
-        let updateIterval
-
-        function doesCollide(leftElement, rightElement){
-            const left = parseFloat(getComputedStyle(rightElement).left.replace('px', ''))
-            const right = parseFloat(getComputedStyle(leftElement).left.replace('px', '')) + leftElement.offsetWidth
-            console.log(left, right)
-            return right >= left
+        let iterations = 0
+        
+        const deltaT = 1
+        let startSpeed = -0.25 * deltaT
+        
+        function updateVelocities(){
+            const u1 = speedSmaller
+            const u2 = speedLarger
+            speedSmaller = ((1 - ratio) / (1 + ratio)) * u1 + 
+                            (2 * ratio / (1 + ratio)) * u2
+            speedLarger = (2 * 1 / (1 + ratio)) * u1 + 
+                            ((ratio - 1) / (1 + ratio)) * u2
         }
 
-        function update(){
-            if(doesCollide(smaller, larger)){
-                clearInterval(updateInterval)
+        function doesCollide(leftOfRight, rightOfLeft){
+            return rightOfLeft >= leftOfRight
+        }
+
+        function updateCount(){
+            countEl.innerText = count
+            const pi = count / Math.sqrt(ratio)
+            piEl.innerText = pi.toString().slice(0, 5)
+        }
+
+        const startUpdate = async () => {play = true; update()}
+        const stopUpdate = () => {play = false}
+
+        async function update(){
+            //console.log("updating")
+            for(let i = 0; i < 10; i++);
+            if(doesCollide(leftLarger, leftSmaller + smallerWidth)){
+                //console.log("collided")
+                updateVelocities()
+                count++;
             }
-            else {
-                leftLarger += speedLarger
-                larger.style.left = leftLarger + 'px'
+            if(doesCollide(leftSmaller, wallRight)){
+                //console.log("collided with wall")
+                speedSmaller *= -1
+                count++;
+            }
+            //console.log(leftLarger, leftSmaller, speedLarger, speedSmaller)
+            leftLarger += speedLarger
+            leftSmaller += speedSmaller
+            iterations++
+            if(play) setTimeout(update, 0)
+        }
+
+        function draw(){
+            //console.log(leftLarger, leftSmaller, speedLarger, speedSmaller)
+            updateCount()
+            larger.style.left = leftLarger + 'px'
+            smaller.style.left = leftSmaller + 'px'
+            //console.log(leftLarger, leftSmaller)
+            if(speedSmaller >= 0 && speedLarger >= 0 && speedSmaller < speedLarger){
+                console.log("here")
+                setTimeout(() => {
+                    console.log("hereeee")
+                    stopUpdate()
+                    clearInterval(drawInterval)
+                }, 2000)
             }
         }
 
-        document.getElementById('start').addEventListener("click", (e) => {
+        document.getElementById('start').addEventListener("click", async (e) => {
             ratio = parseFloat(input.value)
             console.log(ratio)
             speedLarger = startSpeed
-            leftLarger = 200
+            speedSmaller = 0
+            count = 0
+            updateCount()
+            leftLarger = 400
             larger.style.left = leftLarger + 'px'
-            momentum = speedLarger * ratio
-            updateInterval = setInterval(update, 100)
+            leftSmaller = 200
+            smaller.style.left = leftSmaller + 'px'
+            startUpdate()
+            drawInterval = setInterval(draw, 10)
+            setInterval(() => console.log(iterations), 1000)
         })
         
     </script>
