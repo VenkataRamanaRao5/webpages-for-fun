@@ -12,39 +12,56 @@
         }
         #container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
         #outer {
-            border: solid black 15px;
-            width: 500px;
-            height: 500px;
-            box-sizing: border-box;
+            border: solid rgb(17, 17, 17) 15px;
+            width: 750px;
+            height: 750px;
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
+            --b: solid rgb(158, 65, 31) 7.5px;
         }
         .column {
             box-sizing: border-box;
             height: 100%;
         }
-        #column1 {
-            border-right: solid orangered 7.5px;
+        #column1, #column2 {
+            border-right: var(--b);
         }
-        #column2 {
-            border-left: solid orangered 7.5px;
-            border-right: solid orangered 7.5px;
-        }
-        #column3 {
-            border-left: solid orangered 7.5px;
+        #column2, #column3 {
+            border-left: var(--b);
         }
         .disk {
-            background-color: maroon;
+            --g:conic-gradient(at 90% 40%,#0000 75%,rgb(128, 0, 0) 0);
+            background: var(--g),var(--g) 10px 10px rgb(86, 6, 6);
+            background-size: calc(2*10px) calc(2*10px);
             position: relative; 
-            height: 26.6667px;
-            transition: left 2s ease;
+            height: 43px;
+            border: solid rgb(86, 6, 6) 2px;
+            box-sizing: border-box;
+            /*
+                Funny story: I forgot I added border and I had not added border box.
+                I was splitting hairs wondering why the disks were going lower and lower
+                the column when I add more disks. The absence of box-sizing meant I was
+                adding 4 pixels more for each disk which pushed it down. I still dont know
+                if constant top is the right way to do this, and why it even works.
+            */
         }
         .selected {
-            opacity: 80%;
+            transition: top 0.2s ease, left 0.15s ease-in-out;
+            opacity: 70%;
+        }
+        #buttons {
+            padding: 15px;
+        }
+        #pick, #reset {
+            width: 100px;
+            border-radius: 7px;
+            height: 50px;
+            font-size: large;
         }
     </style>
 </head>
@@ -55,6 +72,10 @@
             <div id="column2" class="column"></div>
             <div id="column3" class="column"></div>
         </div>
+        <div id="buttons">
+            <input type="number" id="pick" value="7"/>
+            <button id="reset">Reset</button>
+        </div>
     </div>
     <script defer>
 
@@ -62,11 +83,11 @@
         const col2 = document.getElementById("column2")
         const col3 = document.getElementById("column3")
         const cols = [col1, col2, col3]
-        const n = 7
         const maxWidth = 90, // In percentage
             minWidth = 20, // In percentage
             diff = maxWidth - minWidth,
-            height = 4 * minWidth / 3 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
+            overallSize = 750,
+            height = 43 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
         
         class Block {
             constructor(index, width, column, top, element){
@@ -76,74 +97,117 @@
                 this.top = top;
                 this.element = element;
             }
-            move(newColumn) {
-                
-            }
         }
-        
-        let columns = [[], [], []]
-
-        for(let i = 0; i < n ; i++){
-            let disk = document.createElement('div')
-            disk.classList.add("disk")
-            disk.id = `disk${i}`
-            let width = minWidth + diff * i / (n - 1)
-            /* 
-                For only God knows why, the top should remain a darn constant.
-                Else, we get phantom elements in between. For instance, if top of
-                first = 340px, height = 26.67px, top of second = 366.67px, I'd
-                expect the second to be rendered just below the first. But for
-                some stupid freaking reason, there is a nice clean empty space
-                of 26.67 pixels between both divs and the second's top is whatever
-                is 366 + 36. Constant 340px across all disk work darn fine. I have to
-                see how it goes when I move them between columns.
-            */
-            let top = 470 - (n) * height
-            disk.style.width = width + '%'
-            disk.style.top = top + 'px'
-            disk.style.left = `${50 - width / 2}%`
-            columns[0].push(new Block(i , width, 0, top, disk))
-            col1.appendChild(disk)
-        }
-
+        let n = 7
         let selected = undefined
 
-        cols.forEach((col, index) => {
-            col.onclick = (event) => {
-                if(selected !== undefined){
-                    let top = columns[selected][0]
-                    if(!top)    return
-                    top.top += 10
-                    if(index != selected) {
-                        let disk = top.element
-                        cols[selected].removeChild(disk)
-                        cols[index].prepend(disk)
-                        columns[index].unshift(columns[selected].shift())
-                        disk.style.top = top.top + 'px'
-                        columns[selected].forEach(el => {
-                            el.top += height
-                            el.element.style.top = el.top + 'px'
-                        })
-                        columns[index].forEach(el => {
-                            el.top -= height
-                            el.element.style.top = el.top + 'px'
-                        })
-                        top.top = 470 - (columns[index].length) * height
-                    }
-                    top.element.classList.remove("selected")
-                    top.element.style.top = top.top + 'px'
-                    selected = undefined
-                }
-                else {
-                    let top = columns[index][0]
-                    if(!top)    return
-                    top.element.classList.add("selected")
-                    top.top -= 10
-                    top.element.style.top = top.top + 'px'
-                    selected = index
-                }
-            }
+        document.getElementById("pick").addEventListener("change", e => {
+            console.log(e.target)
+            n = e.target.value
+            render(n)
         })
+
+        document.getElementById("reset").onclick = e => {
+            render(n)
+        }
+
+        function render(n){
+            let columns = [[], [], []]
+            cols.forEach(col => col.innerHTML = '')
+
+            for(let i = 0; i < n ; i++){
+                let disk = document.createElement('div')
+                disk.classList.add("disk")
+                disk.id = `disk${i}`
+                let width = minWidth + diff * i / (n - 1)
+                /* 
+                    For only God knows why, the top should remain a darn constant.
+                    Else, we get phantom elements in between. For instance, if top of
+                    first = 340px, height = 26.67px, top of second = 366.67px, I'd
+                    expect the second to be rendered just below the first. But for
+                    some stupid freaking reason, there is a nice clean empty space
+                    of 26.67 pixels between both divs and the second's top is whatever
+                    is 366 + 36. Constant 340px across all disk work darn fine. I have to
+                    see how it goes when I move them between columns.
+                */
+                let top = overallSize - (n) * height
+                disk.style.width = width + '%'
+                disk.style.top = top + 'px'
+                disk.style.left = `${50 - width / 2}%`
+                columns[0].push(new Block(i , width, 0, top, disk))
+                col1.appendChild(disk)
+            }
+
+            selected = undefined
+
+            cols.forEach((col, index) => {
+                col.onclick = (event) => {
+                    if(selected !== undefined){
+                        let top = columns[selected][0]
+                        if(!top)    return
+                        let disk = top.element
+                        if(index != selected) {
+                            if(columns[index].length && columns[index][0].index < top.index){
+                                shake(disk)
+                                return
+                            }
+                            else{
+                                cols[selected].removeChild(disk)
+                                cols[index].prepend(disk)
+                                columns[index].unshift(columns[selected].shift())
+                                disk.style.top = top.top + 'px'
+                                columns[selected].forEach(el => {
+                                    el.top += height
+                                    el.element.style.top = el.top + 'px'
+                                })
+                                columns[index].forEach(el => {
+                                    el.top -= height
+                                    el.element.style.top = el.top + 'px'
+                                })
+                                top.top = overallSize - (columns[index].length) * height
+                            }
+                        }
+                        else
+                            top.top += 20
+                        top.element.style.top = top.top + 'px'
+                        setTimeout(() => {
+                            top.element.classList.remove("selected")
+                        }, 0.2)
+                        selected = undefined
+                    }
+                    else {
+                        let top = columns[index][0]
+                        if(!top)    return
+                        top.element.classList.add("selected")
+                        top.top -= 20
+                        top.element.style.top = top.top + 'px'
+                        selected = index
+                    }
+                }
+            })
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function shake(disk){
+            let leftStr = disk.style.left
+            let left = parseFloat(getComputedStyle(disk).left.split('px')[0])
+            disk.style.left = (left - 50) + 'px'
+            await sleep(30)
+            disk.style.left = (left + 100) + 'px'
+            await sleep(30)
+            disk.style.left = (left - 100) + 'px'
+            await sleep(30)
+            disk.style.left = (left + 100) + 'px'
+            await sleep(30)
+            disk.style.left = (left - 100) + 'px'
+            await sleep(30)
+            disk.style.left = leftStr
+        }
+
+        render(n)
 
     </script>
 </body>
