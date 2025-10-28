@@ -41,6 +41,10 @@
             background-color: maroon;
             position: relative; 
             height: 26.6667px;
+            transition: left 2s ease;
+        }
+        .selected {
+            opacity: 80%;
         }
     </style>
 </head>
@@ -65,7 +69,7 @@
             height = 4 * minWidth / 3 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
         
         class Block {
-            constructor(index, width, column, height, top, element){
+            constructor(index, width, column, top, element){
                 this.index = index;
                 this.width = width;
                 this.column = column;
@@ -78,7 +82,6 @@
         }
         
         let columns = [[], [], []]
-        let blocks = []
 
         for(let i = 0; i < n ; i++){
             let disk = document.createElement('div')
@@ -99,10 +102,48 @@
             disk.style.width = width + '%'
             disk.style.top = top + 'px'
             disk.style.left = `${50 - width / 2}%`
-            blocks.push(new Block(i , width, 0, top, disk))
-            columns[0].push(i)
+            columns[0].push(new Block(i , width, 0, top, disk))
             col1.appendChild(disk)
         }
+
+        let selected = undefined
+
+        cols.forEach((col, index) => {
+            col.onclick = (event) => {
+                if(selected !== undefined){
+                    let top = columns[selected][0]
+                    if(!top)    return
+                    top.top += 10
+                    if(index != selected) {
+                        let disk = top.element
+                        cols[selected].removeChild(disk)
+                        cols[index].prepend(disk)
+                        columns[index].unshift(columns[selected].shift())
+                        disk.style.top = top.top + 'px'
+                        columns[selected].forEach(el => {
+                            el.top += height
+                            el.element.style.top = el.top + 'px'
+                        })
+                        columns[index].forEach(el => {
+                            el.top -= height
+                            el.element.style.top = el.top + 'px'
+                        })
+                        top.top = 470 - (columns[index].length) * height
+                    }
+                    top.element.classList.remove("selected")
+                    top.element.style.top = top.top + 'px'
+                    selected = undefined
+                }
+                else {
+                    let top = columns[index][0]
+                    if(!top)    return
+                    top.element.classList.add("selected")
+                    top.top -= 10
+                    top.element.style.top = top.top + 'px'
+                    selected = index
+                }
+            }
+        })
 
     </script>
 </body>
