@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+    <style>
+        html, body, #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        #container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #outer {
+            border: solid black 15px;
+            width: 500px;
+            height: 500px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        .column {
+            box-sizing: border-box;
+            height: 100%;
+        }
+        #column1 {
+            border-right: solid orangered 7.5px;
+        }
+        #column2 {
+            border-left: solid orangered 7.5px;
+            border-right: solid orangered 7.5px;
+        }
+        #column3 {
+            border-left: solid orangered 7.5px;
+        }
+        .disk {
+            background-color: maroon;
+            position: relative; 
+            height: 26.6667px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="outer">
+            <div id="column1" class="column"></div>
+            <div id="column2" class="column"></div>
+            <div id="column3" class="column"></div>
+        </div>
+    </div>
+    <script defer>
+
+        const col1 = document.getElementById("column1")
+        const col2 = document.getElementById("column2")
+        const col3 = document.getElementById("column3")
+        const cols = [col1, col2, col3]
+        const n = 7
+        const maxWidth = 90, // In percentage
+            minWidth = 20, // In percentage
+            diff = maxWidth - minWidth,
+            height = 4 * minWidth / 3 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
+        
+        class Block {
+            constructor(index, width, column, height, top, element){
+                this.index = index;
+                this.width = width;
+                this.column = column;
+                this.top = top;
+                this.element = element;
+            }
+            move(newColumn) {
+                
+            }
+        }
+        
+        let columns = [[], [], []]
+        let blocks = []
+
+        for(let i = 0; i < n ; i++){
+            let disk = document.createElement('div')
+            disk.classList.add("disk")
+            disk.id = `disk${i}`
+            let width = minWidth + diff * i / (n - 1)
+            /* 
+                For only God knows why, the top should remain a darn constant.
+                Else, we get phantom elements in between. For instance, if top of
+                first = 340px, height = 26.67px, top of second = 366.67px, I'd
+                expect the second to be rendered just below the first. But for
+                some stupid freaking reason, there is a nice clean empty space
+                of 26.67 pixels between both divs and the second's top is whatever
+                is 366 + 36. Constant 340px across all disk work darn fine. I have to
+                see how it goes when I move them between columns.
+            */
+            let top = 470 - (n) * height
+            disk.style.width = width + '%'
+            disk.style.top = top + 'px'
+            disk.style.left = `${50 - width / 2}%`
+            blocks.push(new Block(i , width, 0, top, disk))
+            columns[0].push(i)
+            col1.appendChild(disk)
+        }
+
+    </script>
+</body>
+</html>
