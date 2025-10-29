@@ -18,8 +18,8 @@
         }
         #outer {
             border: solid rgb(17, 17, 17) 15px;
-            width: 750px;
-            height: 750px;
+            width: 500px;
+            height: 500px;
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             --b: solid rgb(158, 65, 31) 7.5px;
@@ -39,7 +39,7 @@
             background: var(--g),var(--g) 10px 10px rgb(86, 6, 6);
             background-size: calc(2*10px) calc(2*10px);
             position: relative; 
-            height: 43px;
+            height: 27px;
             border: solid rgb(86, 6, 6) 2px;
             box-sizing: border-box;
             /*
@@ -86,8 +86,8 @@
         const maxWidth = 90, // In percentage
             minWidth = 20, // In percentage
             diff = maxWidth - minWidth,
-            overallSize = 750,
-            height = 43 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
+            overallSize = 500,
+            height = 27 // In pixel. 400 px * 20 % / 3. I wanted 500 (height of outer) so that the smallest would be a dquare, but that looked awkward, so 5 became 4
         
         class Block {
             constructor(index, width, column, top, element){
