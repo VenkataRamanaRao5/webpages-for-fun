@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="container">
         <canvas id="fourptcurve" width="600" height="500" style="border:1px solid grey"></canvas>
@@ -24,28 +26,31 @@
             <button id="pausePlay" onclick="togglePause()">▶️</button>
             <div>
                 <label for="numPoints">Number of points:</label>
-                <input type="number" id="numPoints" value="2000" onchange="init()"/>
+                <input type="number" id="numPoints" value="2000" onchange="init()" />
             </div>
             <textarea id="config" rows="10" cols="50">
 [
-    {"amplitude": 1.05, "frequency": 1},
-    {"amplitude": -0.05, "frequency": -3},
-    {"amplitude": 0.8, "frequency": 5},
-    {"amplitude": 0.2, "frequency": -7},
-    {"amplitude": -0.25, "frequency": 9},
-    {"amplitude": 0.2, "frequency": -11},
-    {"amplitude": 0.1, "frequency": -15}
+    {"amplitude": 1.5, "frequency": -1, "phase": -1.57},
+    {"amplitude": 0.25, "frequency": 2, "phase": -1.57},
+    {"amplitude": 0.35, "frequency": -2, "phase": -1.57},
+    {"amplitude": -0.3, "frequency": -3, "phase": -1.57},
+    {"amplitude": 0.05, "frequency": 3, "phase": -1.57}
 ]
             </textarea>
-            <button id="reset" onclick="init()">Load</button>
+            <button id="reset">Load</button>
+            <button id="share">Share this drawing</button>
         </div>
     </div>
-        
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.js"></script>
     <script>
-        const canvas = document.getElementById("fourptcurve");
-        const ctx = canvas.getContext("2d");
+        const canvas = document.getElementById("fourptcurve")
+        const ctx = canvas.getContext("2d")
         const pauseButton = document.getElementById("pausePlay")
+        const resetButton = document.getElementById("reset")
+        const config = document.getElementById('config')
+        const share = document.getElementById('share')
+
         let isPaused = true
 
         let xMax = canvas.width;
@@ -53,7 +58,7 @@
         ctx.transform(1, 0, 0, -1, xMax / 2, yMax / 2)
 
         let numPoints = 2000
-        let lengthArray = Array.from({length: numPoints})
+        let lengthArray = Array.from({ length: numPoints })
         let angles = lengthArray.map((_, i) => i * math.PI * 2 / numPoints)
 
         // Yes, I'm only gonna use complex numbers, I dont care if it's ugly in js.
@@ -66,8 +71,8 @@
         const scale = 100
 
         const parameters1 = [
-            {amplitude: 1, frequency: 1},
-            {amplitude: 0.5, frequency: -3}
+            { amplitude: 1, frequency: 1 },
+            { amplitude: 0.5, frequency: -3 }
         ]
         /*
         Find: \[(-?\d\.\d*), (-?\d*)\]
@@ -75,46 +80,77 @@
         To convert from list of list of params to list of json
         */
 
+        const paramters2 = [
+            { amplitude: 1.05, frequency: 1 },
+            { amplitude: -0.05, frequency: -3 },
+            { amplitude: 0.8, frequency: 5 },
+            { amplitude: 0.2, frequency: -7 },
+            { amplitude: -0.25, frequency: 9 },
+            { amplitude: 0.2, frequency: -11 },
+            { amplitude: 0.1, frequency: -15 }
+        ]
+
+        /*
+        [
+            {"amplitude": 1.05, "frequency": 1},
+            {"amplitude": -0.05, "frequency": -3},
+            {"amplitude": 0.8, "frequency": 5},
+            {"amplitude": 0.2, "frequency": -7},
+            {"amplitude": -0.25, "frequency": 9},
+            {"amplitude": 0.2, "frequency": -11},
+            {"amplitude": 0.1, "frequency": -15}
+        ]
+        */
+
         let points = []
-        let parameters = parameters1
-        
+        let parameters
+
+        let urlParams = new URLSearchParams(document.location.search)
+        let epicycles = urlParams.get('config')
+
+        if (epicycles){
+            parameters = decodedJSON(epicycles)   
+            config.value = JSON.stringify(parameters)
+        }
+
         let index = 0
         let drawnPoints = []
         ctx.save()
-        
+
         function init() {
-            if(!isPaused)
+            if (!isPaused)
                 togglePause()
 
             numPoints = document.getElementById("numPoints").value
-            lengthArray = Array.from({length: numPoints})
+            lengthArray = Array.from({ length: numPoints })
             angles = lengthArray.map((_, i) => i * math.PI * 2 / numPoints)
-            parameters = JSON.parse(document.getElementById("config").value)
+            parameters = JSON.parse(config.value)
             ctx.clearRect(-xMax / 2, -yMax / 2, xMax, yMax)
             index = 0
-            
+
             points = []
-            for(let theta of angles) {
+            for (let theta of angles) {
                 let point = []
                 let sum = 0
-                for(let parameter of parameters) {
-                    let res = rEPowerITheta(parameter.amplitude * scale, parameter.frequency * theta)
+                for (let parameter of parameters) {
+                    let res = rEPowerITheta(parameter.amplitude * scale, parameter.frequency * theta + (parameter.phase || 0))
                     sum = math.add(sum, res)
                     point.push(res)
                 }
                 points.push(point)
             }
-            
+
             drawnPoints = []
+
             window.requestAnimationFrame(draw)
-            togglePause()
+            //togglePause()
         }
-        
+
         function draw() {
             ctx.restore()
             ctx.save()
             ctx.clearRect(-xMax / 2, -yMax / 2, xMax, yMax)
-            
+
             drawnPoints.forEach(point => {
                 ctx.restore()
                 ctx.save()
@@ -123,7 +159,7 @@
                 ctx.ellipse(point[0], point[1], 2, 2, 0, 0, Math.PI * 2)
                 ctx.fill()
             })
-            
+
             let lastX = 0, lastY = 0
             let sumX = 0, sumY = 0
 
@@ -141,9 +177,9 @@
                 ctx.fillStyle = "blue"
                 ctx.lineWidth = 0.75
                 ctx.beginPath()
-                ctx.ellipse(0, 0, 
-                    Math.abs(parameters[i].amplitude * scale), 
-                    Math.abs(parameters[i].amplitude * scale), 
+                ctx.ellipse(0, 0,
+                    Math.abs(parameters[i].amplitude * scale),
+                    Math.abs(parameters[i].amplitude * scale),
                     0, 0, Math.PI * 2)
                 ctx.stroke()
                 ctx.fillStyle = "red"
@@ -166,27 +202,59 @@
             if (index === angles.length) {
                 index = 0
             }
-            if(!isPaused)
+            if (!isPaused)
                 window.requestAnimationFrame(draw)
         }
 
         function togglePause() {
+            console.log("here")
             isPaused = !isPaused
-            if(!isPaused){
+            if (!isPaused) {
                 pauseButton.innerText = '⏸️'
                 window.requestAnimationFrame(draw)
             } else {
                 pauseButton.innerText = '▶️'
             }
-            
         }
 
+        function encodedString() {
+            return JSON.stringify(parameters)
+                .replaceAll('},', 's')
+                .replaceAll(/[\[\]\{\}]/g, '')
+                .replaceAll(`"amplitude":`, '')
+                .replaceAll(`"frequency":`, '')
+                .replaceAll(`"phase":`, '')
+                .replaceAll(`,`, 'c')
+        }
+
+        function decodedJSON(encodedString) {
+            return encodedString.split('s').map(each => {
+                let arr = each.split('c')
+                return {
+                    amplitude: parseFloat(arr[0]),
+                    frequency: parseFloat(arr[1]),
+                    phase: parseFloat(arr[2]) || 0
+                }
+            })
+        }
+
+        resetButton.addEventListener("click", (e) => {
+            resetButton.blur()
+            init()
+        })
+
+        share.addEventListener("click", (e) => {
+            navigator.clipboard.writeText(`${window.location.origin}/epicycles.html?config=${encodedString()}`)
+            window.alert("encoded url copied to clipboard")
+        })
+
         window.addEventListener("keydown", (e) => {
-            if(e.key === " ") 
+            if (e.key === " ")
                 togglePause()
         })
 
         init()
     </script>
 </body>
+
 </html>
